@@ -590,7 +590,7 @@ function PairPage({ pairAddress, history }) {
                             <ReactSelect
                               styles={colourStyles}
                               options={[{value: Token0?.symbol, label: Token0?.symbol}, {value: Token1?.symbol, label:  Token1?.symbol}]}
-                              defaultValue={{value: Token0?.symbol, label: Token0?.symbol}}
+                              defaultValue={{value: currentToken?.symbol, label: currentToken?.symbol}}
                               onChange={({value}) => {
                                 if (value === Token0.symbol) {
                                   setCurrentToken(Token0)
