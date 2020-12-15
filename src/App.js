@@ -43,9 +43,9 @@ const Right = styled.div`
   position: fixed;
   right: 0;
   bottom: 0rem;
+  top: 0rem;
   z-index: 99;
   width: ${({ open }) => (open ? '220px' : '64px')};
-  height: ${({ open }) => (open ? 'fit-content' : '64px')};
   overflow: auto;
   background-color: ${({ theme }) => theme.bg1};
   @media screen and (max-width: 1400px) {
@@ -127,7 +127,7 @@ function App() {
                 path="/token/:tokenAddress"
                 render={({ match }) => {
                   if (OVERVIEW_TOKEN_BLACKLIST.includes(match.params.tokenAddress.toLowerCase())) {
-                    return <Redirect to="/home" />
+                    return <Redirect to="/pairs" />
                   }
                   if (isAddress(match.params.tokenAddress.toLowerCase())) {
                     return (
@@ -136,7 +136,7 @@ function App() {
                       </LayoutWrapper>
                     )
                   } else {
-                    return <Redirect to="/home" />
+                    return <Redirect to="/pairs" />
                   }
                 }}
               />
@@ -155,7 +155,7 @@ function App() {
                       </LayoutWrapper>
                     )
                   } else {
-                    return <Redirect to="/home" />
+                    return <Redirect to="/pairs" />
                   }
                 }}
               />
@@ -171,16 +171,16 @@ function App() {
                       </LayoutWrapper>
                     )
                   } else {
-                    return <Redirect to="/home" />
+                    return <Redirect to="/pairs" />
                   }
                 }}
               />
 
-              <Route path="/home">
-                <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
-                  <GlobalPage />
-                </LayoutWrapper>
-              </Route>
+              {/*<Route path="/home">*/}
+                {/*<LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>*/}
+                  {/*<GlobalPage />*/}
+                {/*</LayoutWrapper>*/}
+              {/*</Route>*/}
 
               <Route path="/tokens">
                 <LayoutWrapper savedOpen={savedOpen} setSavedOpen={setSavedOpen}>
@@ -200,7 +200,7 @@ function App() {
                 </LayoutWrapper>
               </Route>
 
-              <Redirect to="/home" />
+              <Redirect to="/pairs" />
             </Switch>
           </BrowserRouter>
         ) : (

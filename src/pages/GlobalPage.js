@@ -48,8 +48,8 @@ function GlobalPage() {
   // get data for lists and totals
   const allPairs = useAllPairData()
   const allTokens = useAllTokenData()
-  const transactions = useGlobalTransactions()
-  const { totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD } = useGlobalData()
+  // const transactions = useGlobalTransactions()
+  // const { totalLiquidityUSD, oneDayVolumeUSD, volumeChangeUSD, liquidityChangeUSD } = useGlobalData()
 
   // breakpoints
   const below800 = useMedia('(max-width: 800px)')
@@ -68,62 +68,62 @@ function GlobalPage() {
       <ThemedBackground backgroundColor={transparentize(0.8, '#ff007a')} />
       <ContentWrapper>
         <div>
-          <AutoColumn gap="24px" style={{ paddingBottom: below800 ? '0' : '24px' }}>
-            <TYPE.largeHeader>{below800 ? 'Protocol Analytics' : 'Uniswap Protocol Analytics'}</TYPE.largeHeader>
-            <Search />
-            <GlobalStats />
-          </AutoColumn>
-          {below800 && ( // mobile card
-            <Box mb={20}>
-              <Panel>
-                <Box>
-                  <AutoColumn gap="36px">
-                    <AutoColumn gap="20px">
-                      <RowBetween>
-                        <TYPE.main>Volume (24hrs)</TYPE.main>
-                        <div />
-                      </RowBetween>
-                      <RowBetween align="flex-end">
-                        <TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={600}>
-                          {formattedNum(oneDayVolumeUSD, true)}
-                        </TYPE.main>
-                        <TYPE.main fontSize={12}>{formattedPercent(volumeChangeUSD)}</TYPE.main>
-                      </RowBetween>
-                    </AutoColumn>
-                    <AutoColumn gap="20px">
-                      <RowBetween>
-                        <TYPE.main>Total Liquidity</TYPE.main>
-                        <div />
-                      </RowBetween>
-                      <RowBetween align="flex-end">
-                        <TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={600}>
-                          {formattedNum(totalLiquidityUSD, true)}
-                        </TYPE.main>
-                        <TYPE.main fontSize={12}>{formattedPercent(liquidityChangeUSD)}</TYPE.main>
-                      </RowBetween>
-                    </AutoColumn>
-                  </AutoColumn>
-                </Box>
-              </Panel>
-            </Box>
-          )}
-          {!below800 && (
-            <GridRow>
-              <Panel style={{ height: '100%', minHeight: '300px' }}>
-                <GlobalChart display="liquidity" />
-              </Panel>
-              <Panel style={{ height: '100%' }}>
-                <GlobalChart display="volume" />
-              </Panel>
-            </GridRow>
-          )}
-          {below800 && (
-            <AutoColumn style={{ marginTop: '6px' }} gap="24px">
-              <Panel style={{ height: '100%', minHeight: '300px' }}>
-                <GlobalChart display="liquidity" />
-              </Panel>
-            </AutoColumn>
-          )}
+          {/*<AutoColumn gap="24px" style={{ paddingBottom: below800 ? '0' : '24px' }}>*/}
+            {/*<TYPE.largeHeader>{below800 ? 'Protocol Analytics' : 'Uniswap Protocol Analytics'}</TYPE.largeHeader>*/}
+            {/*<Search />*/}
+            {/*<GlobalStats />*/}
+          {/*</AutoColumn>*/}
+          {/*{below800 && ( // mobile card*/}
+            {/*<Box mb={20}>*/}
+              {/*<Panel>*/}
+                {/*<Box>*/}
+                  {/*<AutoColumn gap="36px">*/}
+                    {/*<AutoColumn gap="20px">*/}
+                      {/*<RowBetween>*/}
+                        {/*<TYPE.main>Volume (24hrs)</TYPE.main>*/}
+                        {/*<div />*/}
+                      {/*</RowBetween>*/}
+                      {/*<RowBetween align="flex-end">*/}
+                        {/*<TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={600}>*/}
+                          {/*{formattedNum(oneDayVolumeUSD, true)}*/}
+                        {/*</TYPE.main>*/}
+                        {/*<TYPE.main fontSize={12}>{formattedPercent(volumeChangeUSD)}</TYPE.main>*/}
+                      {/*</RowBetween>*/}
+                    {/*</AutoColumn>*/}
+                    {/*<AutoColumn gap="20px">*/}
+                      {/*<RowBetween>*/}
+                        {/*<TYPE.main>Total Liquidity</TYPE.main>*/}
+                        {/*<div />*/}
+                      {/*</RowBetween>*/}
+                      {/*<RowBetween align="flex-end">*/}
+                        {/*<TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={600}>*/}
+                          {/*{formattedNum(totalLiquidityUSD, true)}*/}
+                        {/*</TYPE.main>*/}
+                        {/*<TYPE.main fontSize={12}>{formattedPercent(liquidityChangeUSD)}</TYPE.main>*/}
+                      {/*</RowBetween>*/}
+                    {/*</AutoColumn>*/}
+                  {/*</AutoColumn>*/}
+                {/*</Box>*/}
+              {/*</Panel>*/}
+            {/*</Box>*/}
+          {/*)}*/}
+          {/*{!below800 && (*/}
+            {/*<GridRow>*/}
+              {/*<Panel style={{ height: '100%', minHeight: '300px' }}>*/}
+                {/*<GlobalChart display="liquidity" />*/}
+              {/*</Panel>*/}
+              {/*<Panel style={{ height: '100%' }}>*/}
+                {/*<GlobalChart display="volume" />*/}
+              {/*</Panel>*/}
+            {/*</GridRow>*/}
+          {/*)}*/}
+          {/*{below800 && (*/}
+            {/*<AutoColumn style={{ marginTop: '6px' }} gap="24px">*/}
+              {/*<Panel style={{ height: '100%', minHeight: '300px' }}>*/}
+                {/*<GlobalChart display="liquidity" />*/}
+              {/*</Panel>*/}
+            {/*</AutoColumn>*/}
+          {/*)}*/}
           <ListOptions gap="10px" style={{ marginTop: '2rem', marginBottom: '.5rem' }}>
             <RowBetween>
               <TYPE.main fontSize={'1.125rem'}>Top Tokens</TYPE.main>
@@ -143,14 +143,14 @@ function GlobalPage() {
             <PairList pairs={allPairs} />
           </Panel>
 
-          <span>
-            <TYPE.main fontSize={'1.125rem'} style={{ marginTop: '2rem' }}>
-              Transactions
-            </TYPE.main>
-          </span>
-          <Panel style={{ margin: '1rem 0' }}>
-            <TxnList transactions={transactions} />
-          </Panel>
+          {/*<span>*/}
+            {/*<TYPE.main fontSize={'1.125rem'} style={{ marginTop: '2rem' }}>*/}
+              {/*Transactions*/}
+            {/*</TYPE.main>*/}
+          {/*</span>*/}
+          {/*<Panel style={{ margin: '1rem 0' }}>*/}
+            {/*<TxnList transactions={transactions} />*/}
+          {/*</Panel>*/}
         </div>
       </ContentWrapper>
     </PageWrapper>

@@ -116,24 +116,12 @@ function SideNav({ history }) {
             <Title />
             {!below1080 && (
               <AutoColumn gap="1.25rem" style={{ marginTop: '1rem' }}>
-                <BasicLink to="/home">
-                  <Option activeText={history.location.pathname === '/home' ?? undefined}>
-                    <TrendingUp size={20} style={{ marginRight: '.75rem' }} />
-                    Overview
-                  </Option>
-                </BasicLink>
-                <BasicLink to="/tokens">
-                  <Option
-                    activeText={
-                      (history.location.pathname.split('/')[1] === 'tokens' ||
-                        history.location.pathname.split('/')[1] === 'token') ??
-                      undefined
-                    }
-                  >
-                    <Disc size={20} style={{ marginRight: '.75rem' }} />
-                    Tokens
-                  </Option>
-                </BasicLink>
+                {/*<BasicLink to="/home">*/}
+                  {/*<Option activeText={history.location.pathname === '/home' ?? undefined}>*/}
+                    {/*<TrendingUp size={20} style={{ marginRight: '.75rem' }} />*/}
+                    {/*Overview*/}
+                  {/*</Option>*/}
+                {/*</BasicLink>*/}
                 <BasicLink to="/pairs">
                   <Option
                     activeText={
@@ -144,6 +132,19 @@ function SideNav({ history }) {
                   >
                     <PieChart size={20} style={{ marginRight: '.75rem' }} />
                     Pairs
+                  </Option>
+                </BasicLink>
+
+                <BasicLink to="/tokens">
+                  <Option
+                      activeText={
+                        (history.location.pathname.split('/')[1] === 'tokens' ||
+                            history.location.pathname.split('/')[1] === 'token') ??
+                        undefined
+                      }
+                  >
+                    <Disc size={20} style={{ marginRight: '.75rem' }} />
+                    Tokens
                   </Option>
                 </BasicLink>
 
@@ -163,31 +164,31 @@ function SideNav({ history }) {
             )}
           </AutoColumn>
           <AutoColumn gap="0.5rem" style={{ marginLeft: '.75rem', marginBottom: '4rem' }}>
-            <HeaderText>
-              <Link href="https://uniswap.org" target="_blank">
-                Uniswap.org
-              </Link>
-            </HeaderText>
-            <HeaderText>
-              <Link href="https://v1.uniswap.info" target="_blank">
-                V1 Analytics
-              </Link>
-            </HeaderText>
-            <HeaderText>
-              <Link href="https://uniswap.org/docs/v2" target="_blank">
-                Docs
-              </Link>
-            </HeaderText>
-            <HeaderText>
-              <Link href="https://discord.com/invite/XErMcTq" target="_blank">
-                Discord
-              </Link>
-            </HeaderText>
-            <HeaderText>
-              <Link href="https://twitter.com/UniswapProtocol" target="_blank">
-                Twitter
-              </Link>
-            </HeaderText>
+            {/*<HeaderText>*/}
+              {/*<Link href="https://uniswap.org" target="_blank">*/}
+                {/*Uniswap.org*/}
+              {/*</Link>*/}
+            {/*</HeaderText>*/}
+            {/*<HeaderText>*/}
+              {/*<Link href="https://v1.uniswap.info" target="_blank">*/}
+                {/*V1 Analytics*/}
+              {/*</Link>*/}
+            {/*</HeaderText>*/}
+            {/*<HeaderText>*/}
+              {/*<Link href="https://uniswap.org/docs/v2" target="_blank">*/}
+                {/*Docs*/}
+              {/*</Link>*/}
+            {/*</HeaderText>*/}
+            {/*<HeaderText>*/}
+              {/*<Link href="https://discord.com/invite/XErMcTq" target="_blank">*/}
+                {/*Discord*/}
+              {/*</Link>*/}
+            {/*</HeaderText>*/}
+            {/*<HeaderText>*/}
+              {/*<Link href="https://twitter.com/UniswapProtocol" target="_blank">*/}
+                {/*Twitter*/}
+              {/*</Link>*/}
+            {/*</HeaderText>*/}
             <Toggle isActive={isDark} toggle={toggleDarkMode} />
           </AutoColumn>
           {!below1180 && (

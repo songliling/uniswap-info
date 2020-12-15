@@ -454,8 +454,8 @@ const getEthPrice = async () => {
       query: ETH_PRICE(oneDayBlock),
       fetchPolicy: 'cache-first',
     })
-    const currentPrice = result?.data?.bundles[0]?.ethPrice
-    const oneDayBackPrice = resultOneDay?.data?.bundles[0]?.ethPrice
+    const currentPrice = result?.data?.bundles[0]?.ethPrice ? result?.data?.bundles[0]?.ethPrice : 590
+    const oneDayBackPrice = resultOneDay?.data?.bundles[0]?.ethPrice ? resultOneDay?.data?.bundles[0]?.ethPrice : 580
     priceChangeETH = getPercentChange(currentPrice, oneDayBackPrice)
     ethPrice = currentPrice
     ethPriceOneDay = oneDayBackPrice
@@ -659,6 +659,7 @@ export function useTopLps() {
       let topLpLists = await Promise.all(
         topPairs.map(async (pair) => {
           // for each one, fetch top LPs
+          console.log("pair", pair.toString())
           try {
             const { data: results } = await client.query({
               query: TOP_LPS_PER_PAIRS,

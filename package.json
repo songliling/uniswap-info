@@ -3,6 +3,11 @@
   "private": true,
   "homepage": "https://info.uniswap.org",
   "devDependencies": {
+    "@ethersproject/address": "^5.0.5",
+    "@ethersproject/contracts": "^5.0.5",
+    "@ethersproject/networks": "^5.0.4",
+    "@ethersproject/providers": "^5.0.14",
+    "@ethersproject/solidity": "^5.0.5",
     "@popperjs/core": "^2.4.2",
     "@reach/portal": "^0.10.3",
     "@reach/router": "^1.2.1",
@@ -13,6 +18,7 @@
     "@types/styled-components": "^5.1.0",
     "@typescript-eslint/eslint-plugin": "^4.4.0",
     "@typescript-eslint/parser": "^4.4.0",
+    "@uniswap/sdk": "3.0.3",
     "@uniswap/token-lists": "^1.0.0-beta.15",
     "ajv": "^6.12.4",
     "animated-number-react": "^0.1.1",
@@ -30,7 +36,7 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.21.3",
     "eslint-plugin-react-hooks": "^4.1.2",
-    "ethers": "^4.0.39",
+    "ethers": "^5.0.24",
     "export-to-csv": "^0.2.1",
     "feather-icons": "^4.24.1",
     "graphql": "^14.5.6",
@@ -88,5 +94,12 @@
       "last 1 safari version"
     ]
   },
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@ethersproject/address": "^5.0.8",
+    "bootstrap": "^4.5.3",
+    "react-bootstrap": "^1.4.0",
+    "react-loading": "^2.0.3",
+    "react-toastify": "^6.2.0"
+  }
 }

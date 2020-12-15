@@ -471,15 +471,18 @@ export function Updater() {
       })
 
       // format as array of addresses
-      const formattedPairs = pairs.map((pair) => {
-        return pair.id
-      })
+      console.log("process.env.REACT_APP_PAIRS", process.env.REACT_APP_PAIRS)
+      const formattedPairs = [process.env.REACT_APP_PAIRS]
+      // const formattedPairs = pairs.map((pair) => {
+      //   return pair.id
+      // })
 
       // get data for every pair in list
       let topPairs = await getBulkPairData(formattedPairs, ethPrice)
       topPairs && updateTopPairs(topPairs)
     }
-    ethPrice && getData()
+    // ethPrice && getData()
+    getData()
   }, [ethPrice, updateTopPairs])
   return null
 }

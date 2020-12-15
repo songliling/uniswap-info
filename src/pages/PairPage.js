@@ -31,6 +31,15 @@ import { Bookmark, PlusCircle } from 'react-feather'
 import FormattedName from '../components/FormattedName'
 import { useListedTokens } from '../contexts/Application'
 
+import { Token, Fetcher, Trade, Route, TokenAmount, TradeType, Percent, Fraction } from '@uniswap/sdk'
+import JSBI from 'jsbi'
+import ReactLoading from 'react-loading'
+import { Modal } from 'react-bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { default as ReactSelect } from 'react-select'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const DashboardWrapper = styled.div`
   width: 100%;
 `
@@ -105,6 +114,54 @@ const WarningGrouping = styled.div`
   opacity: ${({ disabled }) => disabled && '0.4'};
   pointer-events: ${({ disabled }) => disabled && 'none'};
 `
+
+const Input = styled.input`
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 60%;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: ${({ theme }) => theme.text1};
+  background-color: ${({ theme }) => theme.bg1};
+  font-size: 16px;
+  margin-right: 1rem;
+  border: 1px solid ${({ theme }) => theme.bg3};
+
+  ::placeholder {
+    color: ${({ theme }) => theme.text3};
+    font-size: 14px;
+  }
+
+  @media screen and (max-width: 640px) {
+    ::placeholder {
+      font-size: 1rem;
+    }
+  }
+`
+
+const colourStyles = {
+  control: styles => ({ ...styles, color: 'blue', backgroundColor: '#1f2026' }),
+  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    return {
+      ...styles,
+      backgroundColor: '#1f2026',
+      color: '#FAFAFA',
+      fontWeight: 500,
+    }
+  },
+  singleValue: (provided) => {
+    return {
+      ...provided,
+      color: '#FAFAFA',
+      fontWeight: 500,
+    }
+  },
+}
 
 function PairPage({ pairAddress, history }) {
   const {
@@ -188,6 +245,11 @@ function PairPage({ pairAddress, history }) {
 
   const [dismissed, markAsDismissed] = usePathDismissed(history.location.pathname)
 
+  const TOKEN0 = React.Component.prototype.TOKEN0
+  const TOKEN1 = React.Component.prototype.TOKEN1
+  const Token0 = new Token(TOKEN0.chainId, TOKEN0.address, TOKEN0.decimals, TOKEN0.symbol)
+  const Token1 = new Token(TOKEN1.chainId, TOKEN1.address, TOKEN1.decimals, TOKEN1.symbol)
+
   useEffect(() => {
     window.scrollTo({
       behavior: 'smooth',
@@ -199,8 +261,125 @@ function PairPage({ pairAddress, history }) {
 
   const listedTokens = useListedTokens()
 
+  const [r0, setR0] = useState()
+
+  const [impact, setImpact] = useState()
+
+  const [trade, setTrade] = useState()
+
+  const [showloading, setShowLoading] = useState(false)
+
+  const [showResult, setShowResult] = useState(false)
+
+  const [currentToken, setCurrentToken] = useState(Token0)
+
+  const Regex = /^[0-9]+([.]{1}[0-9]+){0,1}$/
+
+  const MAX_IMPACT = 15
+  const MIN_IMPACT = 0.01
+
+  const BASE_NUMBER = 1000000000000000000
+
+  // setCurrentToken(Token0)
+
+  function validateInput() {
+    let reserve
+    if (currentToken.symbol === token0.symbol) {
+      reserve = reserve0
+    } else {
+      reserve = reserve1
+    }
+    if (Number(r0) >= reserve) {
+      toast.error(`input ${currentToken.symbol} must < ${reserve}`)
+    }
+    return Number(r0) < reserve
+  }
+
+  async function handleSwapInfo() {
+    if (!((r0 && Regex.test(r0)) && (Regex.test(impact)))) {
+      toast.error('invalid input')
+      return
+    }
+    // validateInput()
+    const validInput = (validateInput() && r0)
+    const validImpact = (Number(impact) <= MAX_IMPACT && Number(impact) > MIN_IMPACT)
+    if (!validInput) {
+      return
+    }
+    if (!validImpact) {
+      toast.error(`input impact must between ${MIN_IMPACT} and ${MAX_IMPACT}`)
+      return
+    }
+
+    setShowLoading(true)
+    const pair = await Fetcher.fetchPairData(Token1, Token0)
+    const route = new Route([pair], currentToken)
+
+
+    const r0JSBI = new Fraction(JSBI.BigInt(Number(r0) * BASE_NUMBER), JSBI.BigInt(BASE_NUMBER))
+    const trade = new Trade(route, new TokenAmount(currentToken, r0JSBI.multiply(JSBI.BigInt(BASE_NUMBER)).toFixed(0)), TradeType.EXACT_INPUT)
+
+    setTrade(trade)
+
+    setShowLoading(false)
+
+    setShowResult(true)
+  }
+
+  function formatNumber(r) {
+    return new Fraction(JSBI.BigInt(Number(r) * BASE_NUMBER), JSBI.BigInt(BASE_NUMBER))
+  }
+
+  function show() {
+    const perInputImpact = Regex.test(impact) ? new Percent(JSBI.BigInt(Number(impact) * 1000000), JSBI.BigInt(100000000)) : 1
+    const realImpactWithoutFeeFraction = trade ? trade.priceImpact.subtract(new Percent(JSBI.BigInt(30), JSBI.BigInt(10000))) : 1
+    const realImpactWithoutFeePercent = realImpactWithoutFeeFraction ? new Percent(realImpactWithoutFeeFraction.numerator, realImpactWithoutFeeFraction.denominator) : 1
+    const title = realImpactWithoutFeePercent?.greaterThan(perInputImpact) ? 'Error' : 'Success'
+    let addR0
+    let addR1
+    if (realImpactWithoutFeePercent?.greaterThan(perInputImpact)) {
+      let ONE_HUNDRED_PERCENT = new Percent(JSBI.BigInt(10000), JSBI.BigInt(10000))
+      let x = currentToken.symbol === token0.symbol ? reserve0 : reserve1
+      let r0r1 = currentToken.symbol === token0.symbol ? token1Rate : token0Rate
+      // k * 滑点 * x * result = x * k * x * (1 - 滑点)
+      // result = x * (1 - 滑点) / 滑点
+      addR0 = formatNumber(r0).multiply(ONE_HUNDRED_PERCENT.subtract(perInputImpact)).divide(perInputImpact).subtract(formatNumber(x))
+      addR1 = addR0.divide(formatNumber(r0r1))
+    }
+    return (
+      <Modal show={showResult} style={{zIndex: '9999'}} onHide={() => setShowResult(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div>
+            <p>输入{trade?.inputAmount.toSignificant(6)} {currentToken.symbol}</p>
+            <p>输出{trade?.outputAmount.toSignificant(6)} {currentToken.symbol === Token0.symbol ? Token1.symbol : Token0.symbol}</p>
+          </div>
+          {
+            title === 'Success' ?
+              <div>
+                <p>当前滑点 {realImpactWithoutFeePercent.toFixed(2)}% 小于 {perInputImpact.toFixed(2)}%</p>
+              </div> :
+              <div>
+                <p>当前滑点{realImpactWithoutFeePercent?.toFixed(2)}% 大于 {perInputImpact.toFixed(2)}%</p>
+                <p>至少需要注入{addR0.toFixed(6)} {currentToken.symbol}</p>
+                <p>至少需要注入{addR1.toFixed(6)} {currentToken.symbol === Token0.symbol ? Token1.symbol : Token0.symbol}</p>
+              </div>
+          }
+        </Modal.Body>
+      </Modal>
+    )
+  }
+
   return (
     <PageWrapper>
+      <ToastContainer
+        autoClose={2000}
+        hideProgressBar
+        closeOnClick
+      />
+      {showResult && show()}
       <ThemedBackground backgroundColor={transparentize(0.6, backgroundColor)} />
       <span />
       <Warning
@@ -321,48 +500,48 @@ function PairPage({ pairAddress, history }) {
             <>
               {!below1080 && <TYPE.main fontSize={'1.125rem'}>Pair Stats</TYPE.main>}
               <PanelWrapper style={{ marginTop: '1.5rem' }}>
-                <Panel style={{ height: '100%' }}>
-                  <AutoColumn gap="20px">
-                    <RowBetween>
-                      <TYPE.main>Total Liquidity {!usingTracked ? '(Untracked)' : ''}</TYPE.main>
-                      <div />
-                    </RowBetween>
-                    <RowBetween align="flex-end">
-                      <TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>
-                        {liquidity}
-                      </TYPE.main>
-                      <TYPE.main>{liquidityChange}</TYPE.main>
-                    </RowBetween>
-                  </AutoColumn>
-                </Panel>
-                <Panel style={{ height: '100%' }}>
-                  <AutoColumn gap="20px">
-                    <RowBetween>
-                      <TYPE.main>Volume (24hrs) {usingUtVolume && '(Untracked)'}</TYPE.main>
-                      <div />
-                    </RowBetween>
-                    <RowBetween align="flex-end">
-                      <TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>
-                        {volume}
-                      </TYPE.main>
-                      <TYPE.main>{volumeChange}</TYPE.main>
-                    </RowBetween>
-                  </AutoColumn>
-                </Panel>
-                <Panel style={{ height: '100%' }}>
-                  <AutoColumn gap="20px">
-                    <RowBetween>
-                      <TYPE.main>Fees (24hrs)</TYPE.main>
-                      <div />
-                    </RowBetween>
-                    <RowBetween align="flex-end">
-                      <TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>
-                        {fees}
-                      </TYPE.main>
-                      <TYPE.main>{volumeChange}</TYPE.main>
-                    </RowBetween>
-                  </AutoColumn>
-                </Panel>
+                {/*<Panel style={{ height: '100%' }}>*/}
+                  {/*<AutoColumn gap="20px">*/}
+                    {/*<RowBetween>*/}
+                      {/*<TYPE.main>Total Liquidity {!usingTracked ? '(Untracked)' : ''}</TYPE.main>*/}
+                      {/*<div />*/}
+                    {/*</RowBetween>*/}
+                    {/*<RowBetween align="flex-end">*/}
+                      {/*<TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>*/}
+                        {/*{liquidity}*/}
+                      {/*</TYPE.main>*/}
+                      {/*<TYPE.main>{liquidityChange}</TYPE.main>*/}
+                    {/*</RowBetween>*/}
+                  {/*</AutoColumn>*/}
+                {/*</Panel>*/}
+                {/*<Panel style={{ height: '100%' }}>*/}
+                  {/*<AutoColumn gap="20px">*/}
+                    {/*<RowBetween>*/}
+                      {/*<TYPE.main>Volume (24hrs) {usingUtVolume && '(Untracked)'}</TYPE.main>*/}
+                      {/*<div />*/}
+                    {/*</RowBetween>*/}
+                    {/*<RowBetween align="flex-end">*/}
+                      {/*<TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>*/}
+                        {/*{volume}*/}
+                      {/*</TYPE.main>*/}
+                      {/*<TYPE.main>{volumeChange}</TYPE.main>*/}
+                    {/*</RowBetween>*/}
+                  {/*</AutoColumn>*/}
+                {/*</Panel>*/}
+                {/*<Panel style={{ height: '100%' }}>*/}
+                  {/*<AutoColumn gap="20px">*/}
+                    {/*<RowBetween>*/}
+                      {/*<TYPE.main>Fees (24hrs)</TYPE.main>*/}
+                      {/*<div />*/}
+                    {/*</RowBetween>*/}
+                    {/*<RowBetween align="flex-end">*/}
+                      {/*<TYPE.main fontSize={'1.5rem'} lineHeight={1} fontWeight={500}>*/}
+                        {/*{fees}*/}
+                      {/*</TYPE.main>*/}
+                      {/*<TYPE.main>{volumeChange}</TYPE.main>*/}
+                    {/*</RowBetween>*/}
+                  {/*</AutoColumn>*/}
+                {/*</Panel>*/}
 
                 <Panel style={{ height: '100%' }}>
                   <AutoColumn gap="20px">
@@ -394,6 +573,68 @@ function PairPage({ pairAddress, history }) {
                     </Hover>
                   </AutoColumn>
                 </Panel>
+
+                <Panel style={{ height: '100%' }}>
+                  <AutoColumn gap="20px">
+                    <RowBetween>
+                      <TYPE.main>Calculate</TYPE.main>
+                      <div />
+                    </RowBetween>
+                    { showloading ?
+                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '140px' }}>
+                        <ReactLoading type={'spinningBubbles'} color={'#fff'} width={'20%'} />
+                      </div> :
+                      <div style={{display: 'flex', flexDirection: 'column', gridRowGap: '20px'}}>
+                        <AutoRow style={{ justifyContent: 'space-between' }}>
+                          <div style={{ width: '100px' }}>
+                            <ReactSelect
+                              styles={colourStyles}
+                              options={[{value: Token0?.symbol, label: Token0?.symbol}, {value: Token1?.symbol, label:  Token1?.symbol}]}
+                              defaultValue={{value: Token0?.symbol, label: Token0?.symbol}}
+                              onChange={({value}) => {
+                                if (value === Token0.symbol) {
+                                  setCurrentToken(Token0)
+                                } else {
+                                  setCurrentToken(Token1)
+                                }
+                              }}
+                            />
+                          </div>
+                          <Input
+                            onChange={(e) => {
+                              setR0(e.target.value)
+                            }}
+                            onFocus={() => {
+                              if (showResult) {
+                                setShowResult(false)
+                              }
+                            }}
+                            value={r0}
+                          />
+                        </AutoRow>
+                        <AutoRow style={{ justifyContent: 'space-between' }}>
+                          <TYPE.header>Impact</TYPE.header>
+                          <Input
+                            onChange={(e) => {
+                              setImpact(e.target.value)
+                            }}
+                            onFocus={() => {
+                              if (showResult) {
+                                setShowResult(false)
+                              }
+                            }}
+                            value={impact}
+                            placeholder="%"
+                          />
+                        </AutoRow>
+                        <AutoRow>
+                          <ButtonLight onClick={handleSwapInfo}>Calculate</ButtonLight>
+                        </AutoRow>
+                      </div>
+                    }
+                  </AutoColumn>
+                </Panel>
+
                 <Panel
                   style={{
                     gridColumn: below1080 ? '1' : '2/4',
