@@ -312,18 +312,23 @@ function PairPage({ pairAddress, history }) {
     }
 
     setShowLoading(true)
-    const pair = await Fetcher.fetchPairData(Token1, Token0)
-    const route = new Route([pair], currentToken)
 
-
-    const r0JSBI = new Fraction(JSBI.BigInt(Number(r0) * BASE_NUMBER), JSBI.BigInt(BASE_NUMBER))
-    const trade = new Trade(route, new TokenAmount(currentToken, r0JSBI.multiply(JSBI.BigInt(BASE_NUMBER)).toFixed(0)), TradeType.EXACT_INPUT)
-
-    setTrade(trade)
-
-    setShowLoading(false)
-
-    setShowResult(true)
+    try {
+      const pair = await Fetcher.fetchPairData(Token1, Token0)
+      const route = new Route([pair], currentToken)
+      const r0JSBI = new Fraction(JSBI.BigInt(Number(r0) * BASE_NUMBER), JSBI.BigInt(BASE_NUMBER))
+      try {
+        const trade = new Trade(route, new TokenAmount(currentToken, r0JSBI.multiply(JSBI.BigInt(BASE_NUMBER)).toFixed(0)), TradeType.EXACT_INPUT)
+        setTrade(trade)
+        setShowLoading(false)
+        setShowResult(true)
+      } catch (error) {
+        throw error
+      }
+    } catch (error) {
+      setShowLoading(false)
+      toast.error(`fetch pair or trade error, please check your network`)
+    }
   }
 
   function formatNumber(r) {
